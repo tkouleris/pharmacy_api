@@ -10,6 +10,12 @@ def index():  # put application's code here
 
     response = requests.get('https://fsa-efimeries.gr/')
     soup = BeautifulSoup(response.text, 'html.parser')
+
+    select = soup.findChildren('select', {'id': 'Date'})
+
+    children = select[0].findChildren("option", recursive=False)
+    date = children[0].text.strip()
+
     tables = soup.findChildren('table')
     my_table = tables[0]
     rows = my_table.findChildren(['th', 'tr'])
@@ -45,10 +51,14 @@ def index():  # put application's code here
             index += 1
         total_rows.append(final_row)
 
-    output = []
+    pharmacies = []
+    districts = []
     for farmakeio_row in total_rows:
-        output.append(farmakeio_row)
-    return output
+        if farmakeio_row['perioxi'] not in districts:
+            districts.append(farmakeio_row['perioxi'])
+        pharmacies.append(farmakeio_row)
+
+    return {'date': date, 'districts': districts, 'pharmacies': pharmacies}
 
 
 if __name__ == '__main__':
